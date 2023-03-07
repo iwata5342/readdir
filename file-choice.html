@@ -22,64 +22,48 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="dir">
-            <div id="currdir"></div>
-            <div id="entries"></div>
-        </div>
-        <br>
-
-        <form class="sabun" action="" method="">
-            <select>
-                <option>ファイル名１</option>
-                <option>ファイル名２</option>
-                <option>ファイル名３</option>
-            </select>
-            <select>
-                <option>ファイル名１</option>
-                <option>ファイル名２</option>
-                <option>ファイル名３</option>
-            </select>
-            <input type="submit" value="差分">
-        </form>
-
-        <br>
-
-        <form class="shinki" action="" method="">
-            <input type="text" name="dname">
-            <input type="submit" value="mkdir">
-        </form>
-        <br><br>
-        <div id="dropTarget">
-            <div id="dropPrompt">Please drop files here</div>
-            <ul id="fileList" class="list-group"></ul>
-        </div>
-        <form class="mt-3 mb-3">
-            <div id="progressBarContainer" class="progress invisible mb-1">
-                <div id="progressBar"
-                    class="progress-bar progress-bar-striped progress-bar-animated"
-                    role="progressbar"></div>
+    <body>
+        <div class="container">
+            <div class="dir">
+                <div id="currdir"></div>
+                <div id="entries"></div>
             </div>
+            <br>
 
-            <div>
-                <form action="" method="post">
-                    <input type="file" name="file" />
+            <form class="sabun" action="" method="">
+                <select>
+                    <option>ファイル名１</option>
+                    <option>ファイル名２</option>
+                    <option>ファイル名３</option>
+                </select>
+                <select>
+                    <option>ファイル名１</option>
+                    <option>ファイル名２</option>
+                    <option>ファイル名３</option>
+                </select>
+                <input type="submit" value="差分">
+            </form>
 
-                    <select>
-                        <option>EXE</option>
-                        <option>TXT</option>
-                        <option>C</option>
-                        <option>CPP</option>
-                    </select>
-                    <br><br>
-                    <input type="submit" id="uploadButton" class="btn btn-primary" value="upload">
-                    <button type="button" id="clearButton" class="btn btn-secondary">
-                        Clear
-                    </button>
-                </form>
+            <br>
+
+            <form class="shinki" action="" method="">
+                <input type="text" name="dname">
+                <input type="submit" value="mkdir">
+            </form>
+            <br><br>
+            <div id="upFileWrap">
+                <div id="inputFile">
+                    <!-- ドラッグ&ドロップエリア -->
+                    <p id="dropArea">ここにファイルをドロップしてください<br>または</p>
+
+                    <!-- 通常のinput[type=file] -->
+                    <div id="inputFileWrap">
+                        <input type="file" name="uploadFile" id="uploadFile">
+                        <div id="btnInputFile"><span>ファイルを選択する</span></div>
+                        <div id="btnChangeFile"><span>ファイルを変更する</span></div>
+                    </div>
+                </div>
             </div>
-        </form>
-    </div>
-</body>
+        </div>
+    </body>
 </html>
