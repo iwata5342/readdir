@@ -1,0 +1,4 @@
+SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types 
+FROM FILES
+WHERE FNAME LIKE 'Server/Home/OASYS2201' || '/%' AND FNAME NOT LIKE 'Server/Home/OASYS2201' || '/%/%'
+;
