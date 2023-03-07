@@ -1,0 +1,63 @@
+﻿@charset "utf-8";
+
+tr {
+	width: 100%;
+}
+
+table {
+	width: 80%;
+	margin-left: 10%;
+	margin-right: 10%;
+	border-collapse: separate;
+	empty-cells: hide;
+}
+
+.col1 {
+	width: 80%;
+}
+
+.col2 {
+	width: 5%;
+}
+
+.col3 {
+	width: 5%;
+}
+
+.col4 {
+	width: 5%;
+}
+
+.col5 {
+	width: 5%;
+}
+
+.sabun {
+	margin-left: 10%;
+}
+
+.shinki {
+	margin-left: 10%;
+}
+
+.kisuu {
+	background-color :darkgray;
+
+}
+
+.gusuu {
+	background-color :white;
+}
+
+#dropTarget {
+    margin-left: 10%;
+}
+
+.mt-3 {
+    margin-left: 10%;
+}
+#dropPrompt {
+
+    background-image: url(./image/b125.jpg);
+}
+
