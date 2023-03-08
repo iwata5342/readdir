@@ -46,39 +46,24 @@ class Database {
             data.name = chNameFromSymToDir (symName);
         };
 
-        pool.query(
-          "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
-          [dir.name], (error, results) => {
-            if (error) throw error;
-            files_tmp = (results.rows).concat();
+        files_tmp = getFile(dir.name);
 
             /* ※attrには文字列が格納されている! 文字列=>bit, bit=>文字列 の変換関数が必要 */
             let i = 0;
             while (i < files_tmp.length) {
-                let type_mask = 1792;
-                let attr = files_tmp[i].attr & type_mask;
+                let attr;
+                const type = files_tmp[i].attr.slice(0, 3);
+                const owner_attr = files_tmp[i].attr.slice(3, 7);
+                const other_attr = files_tmp[i].attr.slice(7);
 
                 if (files_tmp[i].oid == uid) {
-                    files_tmp[i].attr >>= 4;
+                    attr = type + owner_attr;
                 } else {
-                    let tmp = files_tmp[i].attr & 15;
-                    files_tmp[i].attr = (attr >> 4)  | tmp;
-                };
-                
-                /* query 外では値はundefinedとなるのでコードの更新必要。 initDirに新たなメソッド追加して外でも使えるようにした。*/
-                pool.query(
-                "SELECT ECODE AS command FROM EXECUTABLES WHERE (ATTR_CODE >> 4) = ($1 >> 4) AND ((ATTR_CODE & B'0001111') & ($1 & B'0001111') > B'000000');", 
-                [files_tmp[i].attr], (error, results) => {
-                    if (error) throw error;
-                    infos = results.rows;
-                });
-
-                pool.query(
-                    "SELECT TNAME FROM FILE_TYPES WHERE TCODE = B$1", 
-                    [attr], (error, results) => {
-                    if (error) throw error;
-                    ftype = results.rows;
-                });
+                    attr = type + other_attr;
+                }
+         
+                infos = getInfo(attr);
+                ftype = getType(type);
 
                 files.push({
                     name: files_tmp[i].name,
@@ -93,7 +78,7 @@ class Database {
 
     deleteFile(file, res) {
         if (file.type === 'DIR') {
-            file.name += '%';
+            file.name = file.name + '/% AND FNAME = ' + file.name;
         } else if (file.type === 'SYM') {
             pool.query(
                 "DELETE FROM SYMLINKS WHERE SNAME = $1"
@@ -117,6 +102,31 @@ class Database {
             return res.status(200).send(file.name + " を作成しました");
         });
     };
+
+    getFile(dname) {
+        return JSON.parse(JSON.stringfy((pool.query(
+               "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
+               [dname], (error, results) => {
+        
+                   if (error) throw error;
+               })))).rows);
+    };
+
+    getInfo(attr) {
+        return JSON.parse(JSON.stringfy((pool.query(
+               "SELECT ECODE AS command FROM EXECUTABLES WHERE (ATTR_CODE >> 4) = (B$1 >> 4) AND ((ATTR_CODE & B'0001111') & (B$1 & B'0001111') > B'0000000');", 
+               [attr], (error, results) => {
+                   if (error) throw error;
+               })))).rows;
+    };
+
+    getType(type) {
+        return JSON.parse(JSON.stringfy((pool.query(
+               "SELECT TNAME FROM FILE_TYPES WHERE TCODE = B$1", 
+               [type + '00000000'], (error, results) => {
+                   if (error) throw error;
+               })))).rows;
+    }
 };
 
 const db = new Database();
