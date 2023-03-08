@@ -37,20 +37,20 @@ class Database {
         
     }
 
-    getFiles(data) {
+    getFiles(dir) {
         let files_tmp = new Array();
         let infos;
         let ftype;
         let files = new Array();
 
-        if (data.type === 'SYM') {
+        if (dir.type === 'SYM') {
             let symName = data.name;
             data.name = chNameFromSymToDir (symName);
         }
 
         this.pool.query(
           "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
-          [data.name], (error, results) => {
+          [dir.name], (error, results) => {
             if (error) throw error;
             files_tmp = results.rows;
         });
@@ -59,7 +59,7 @@ class Database {
             let type_mask = 1792;
             let attr = files_tmp[i].attr & type_mask;
 
-            if (files_tmp[i].oid === data.uid) {
+            if (files_tmp[i].oid === uid) {
                 files_tmp[i].attr >>= 4;
             } else {
                 let tmp = files_tmp[i].attr & 15;
