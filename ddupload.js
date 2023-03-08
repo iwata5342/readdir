@@ -314,36 +314,36 @@ function initDir(currdir, uid) {
   }
   currdir.appendChild(bgcolor);
 
-			  while (i < filesinfo.length) {
-			    let bgcolor = document.createElement("div");
-			    bgcolor.setAttribute("class", "d-flex justify-content-between");
-			    if (i%2==1) {
-			      bgcolor.setAttribute("class", "bg-gradient d-block bg-secondary text-success bg-opacity-10");
-			    } else {
-			      bgcolor.setAttribute("class", "bg-gradient d-block bg-success bg-opacity-25 text-seccess");
-			    }
+  while (i < filesinfo.length) {
+    let bgcolor = document.createElement("div");
+    bgcolor.setAttribute("class", "d-flex justify-content-between");
+    if (i%2==1) {
+      bgcolor.setAttribute("class", "bg-gradient d-block bg-secondary text-success bg-opacity-10");
+    } else {
+      bgcolor.setAttribute("class", "bg-gradient d-block bg-success bg-opacity-25 text-seccess");
+    }
 
-			    divs = [
-			        document.createElement("div"),
-			        document.createElement("div"),
-			        document.createElement("div")
-			    ];
+    divs = [
+    document.createElement("div"),
+    document.createElement("div"),
+    document.createElement("div")
+    ];
 
-			    let text = filesinfo[i].name;
-			    divs[1].innerHTML = text;
+    let text = filesinfo[i].name;
+    divs[1].innerHTML = text;
           
-          for (let cmd in filesinfo[i].exec) {
-            let element = document.createElement("div");
-            element.setAttribute('id', cmdset.indexOf(cmd));
-            element.innerHTML(cmd);
-            divs[2].appendChild(element);
-          }
+    for (let cmd in filesinfo[i].exec) {
+      let element = document.createElement("div");
+      element.setAttribute('id', cmdset.indexOf(cmd));
+      element.innerHTML(cmd);
+        divs[2].appendChild(element);
+    }
 
-			    j = 0;
-			    while (j < divs.length) {
-			      bgcolor.appendChild(divs[j]);
-			      j++;
-			    };
+    morning beautiful morning beautifulj = 0;
+    while (j < divs.length) {
+      bgcolor.appendChild(divs[j]);
+      j++;
+    };
 
           if (filesinfo[i].type === 'TXT' || filesinfo[i].type === 'C' || filesinfo[i].type === 'CPP') {
             let option = document.createElement("option");
