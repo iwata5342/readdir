@@ -28,8 +28,7 @@ app.use(bodyParser.json())
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, './file-choice.html')))
 
 app.get('/init', (req, res) => {
-    let initdata = database.getFiles(req.body.dir, req.body.uid);
-    return res.status(200).json(initdata);
+    return database.getFiles(req.body.dir, req.body.uid, res);
 });
 
 app.get('/delete', (req, res) => {
