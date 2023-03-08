@@ -54,7 +54,7 @@ class Database {
                     cmds: infos,
                     type: ftype
                 });
-            i++;
+                i++;
             };
             return res.status(200).json(files);
         });
