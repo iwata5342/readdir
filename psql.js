@@ -44,7 +44,7 @@ class Database {
         let files = new Array();
 
         if (dir.type === 'SYM') {
-            let symName = data.name;
+            let symName = dir.name;
             data.name = chNameFromSymToDir (symName);
         }
 
