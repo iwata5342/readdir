@@ -331,29 +331,33 @@ function initDir(currdir, uid) {
 
     let text = filesinfo[i].name;
     divs[1].innerHTML = text;
-          
-    for (let cmd in filesinfo[i].exec) {
+    
+    let textFiles = new Array();
+    for (let file in filesinfo[i].exec) {
+　　　　if (file.exec === '差分') {
+        textFiles.push(filesinfo[i].name);
+        continue;
+      }
       let element = document.createElement("div");
       element.setAttribute('id', cmdset.indexOf(cmd));
       element.innerHTML(cmd);
-        divs[2].appendChild(element);
+      divs[2].appendChild(element);
     }
 
-    morning beautiful morning beautifulj = 0;
+    j = 0;
     while (j < divs.length) {
       bgcolor.appendChild(divs[j]);
       j++;
     };
 
-          if (filesinfo[i].type === 'TXT' || filesinfo[i].type === 'C' || filesinfo[i].type === 'CPP') {
-            let option = document.createElement("option");
-            option.innerHTML = filesinfo[i].name;
-            diffmenu.appendChild(option);
-          }
-
-			    currdir.appendChild(bgcolor);
-			    i++;
-        }
-      }
+    if (filesinfo[i].type === 'TXT' || filesinfo[i].type === 'C' || filesinfo[i].type === 'CPP') {
+      let option = document.createElement("option");
+      option.innerHTML = filesinfo[i].name;
+      diffmenu.appendChild(option);
+    }
+　　　currdir.appendChild(bgcolor);
+    i++;
+  }
+}
   }
 }
