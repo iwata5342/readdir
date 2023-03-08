@@ -107,7 +107,7 @@ class Database {
         });
     };
 
-    createDir(uid, name) {
+    createDir(uid, name, res) {
         pool.query(
             "INSERT INTO FILES VALUES($1, $2, 11111111111);"
             , [name], [uid], (error, results) => {
