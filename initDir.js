@@ -1,5 +1,71 @@
-const database = require('./psql.js')
+const { Pool } = require('pg');
+const connectionString = 'postgresql://postgres:postgres@localhost:5432/hogehoge_db';
+const pool = new Pool({ connectionString });
 
-init = database.getFiles('Server/Home/oasys2201', 12023001);
+/**
+ * Postgresクラス
+ */
+class Postgres {
 
-module.exports = init;
+    /**
+     * Poolからclientを取得
+     * @return {Promise<void>}
+     */
+    async init() {
+        this.client = await pool.connect();
+    }
+
+    /**
+     * SQLを実行
+     * @param query
+     * @param params
+     * @return {Promise<*>}
+     */
+    async execute(query, params = []) {
+        return (await this.client.query(query, params)).rows;
+    }
+
+    /**
+     * 取得したクライアントを解放してPoolに戻す
+     * @return {Promise<void>}
+     */
+    async release() {
+        await this.client.release(true);
+    }
+
+    /**
+     * Transaction Begin
+     * @return {Promise<void>}
+     */
+    async begin() {
+        await this.client.query('BEGIN');
+    }
+
+    /**
+     * Transaction Commit
+     * @return {Promise<void>}
+     */
+    async commit() {
+        await this.client.query('COMMIT');
+    }
+
+    /**
+     * Transaction Rollback
+     * @return {Promise<void>}
+     */
+    async rollback() {
+        await this.client.query('ROLLBACK');
+    }
+}
+
+/**
+ * Postgresのインスタンスを返却
+ * @return {Promise<Postgres>}
+ */
+const getClient = async () => {
+    const postgres = new Postgres();
+    await postgres.init();
+    return postgres;
+};
+
+module.exports.getPostgresClient = getClient;

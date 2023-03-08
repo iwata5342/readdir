@@ -1,9 +1,10 @@
-const { database } = require("pg/lib/defaults");
+const pool = require("./loginDB");
 
 class Database {
     constructor() {
-        this.pool = require("./loginDB");
-    }
+        this.pool = require("./loginDB.js");
+        this.test = 1;
+    };
 
     chNameFromSymToDir(name) {
         let sym = {
@@ -31,14 +32,14 @@ class Database {
               if (error) throw error;
               return results.rows;
         });
-    }
+    };
 
     setHome(uid) {
         
-    }
+    };
 
     getFiles(dir, uid, res) {
-        let files_tmp = new Array();
+        let files_tmp;
         let infos;
         let ftype;
         let files = new Array();
@@ -46,47 +47,51 @@ class Database {
         if (dir.type === 'SYM') {
             let symName = dir.name;
             data.name = chNameFromSymToDir (symName);
-        }
+        };
 
-        this.pool.query(
+        pool.query(
           "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
           [dir.name], (error, results) => {
             if (error) throw error;
-            files_tmp = results.rows;
+            files_tmp = (results.rows).concat();
+
+            /* ※attrには文字列が格納されている! 文字列=>bit, bit=>文字列 の変換関数が必要 */
+            let i = 0;
+            while (i < files_tmp.length) {
+                let type_mask = 1792;
+                let attr = files_tmp[i].attr & type_mask;
+
+                if (files_tmp[i].oid == uid) {
+                    files_tmp[i].attr >>= 4;
+                } else {
+                    let tmp = files_tmp[i].attr & 15;
+                    files_tmp[i].attr = (attr >> 4)  | tmp;
+                };
+                
+                /* query 外では値はundefinedとなるのでコードの更新必要。 initDirに新たなメソッド追加して外でも使えるようにした。*/
+                pool.query(
+                "SELECT ECODE AS command FROM EXECUTABLES WHERE (ATTR_CODE >> 4) = ($1 >> 4) AND ((ATTR_CODE & B'0001111') & ($1 & B'0001111') > B'000000');", 
+                [files_tmp[i].attr], (error, results) => {
+                    if (error) throw error;
+                    infos = results.rows;
+                });
+
+                pool.query(
+                    "SELECT TNAME FROM FILE_TYPES WHERE TCODE = B$1", 
+                    [attr], (error, results) => {
+                    if (error) throw error;
+                    ftype = results.rows;
+                });
+
+                files.push({
+                    name: files_tmp[i].name,
+                    cmds: infos,
+                    type: ftype
+                });
+            i++;
+            };
+            return res.status(200).json(files);
         });
-        let i = 0;
-        while (i < files_tmp.length) {
-            let type_mask = 1792;
-            let attr = files_tmp[i].attr & type_mask;
-
-            if (files_tmp[i].oid === uid) {
-                files_tmp[i].attr >>= 4;
-            } else {
-                let tmp = files_tmp[i].attr & 15;
-                files_tmp[i].attr = (files_tmp[i].attr >> 4) | tmp;
-            }
-            pool.query(
-              "SELECT ENAME AS command FROM EXCUTABLES WHERE ATTR_CODE = B$1", 
-              [files_tmp[i].attr], (error, results) => {
-                if (error) throw error;
-                infos = results.rows;
-            });
-
-            pool.query(
-                "SELECT TNAME FROM FILE_TYPES WHERE TCODE = B$1", 
-                [attr], (error, results) => {
-                  if (error) throw error;
-                  ftype = results.rows;
-            });
-
-            files.add({
-                name: files_tmp[i].name,
-                cmds: infos,
-                type: ftype
-            });
-        i++;
-        }
-        return res.status(200).json(files);
     };
 
     deleteFile(file, res) {
@@ -97,8 +102,8 @@ class Database {
                 "DELETE FROM SYMLINKS WHERE SNAME = $1"
                 , [file.name], (error, results) => {
                 if (error) throw error;
-            })
-        }
+            });
+        };
         pool.query(
             "DELETE FROM FILES WHERE FNAME = $1"
             , [file.name], (error, results) => {
@@ -115,7 +120,7 @@ class Database {
             return res.status(200).send(file.name + " を作成しました");
         });
     };
-}
+};
 
-const db = new Database()
+const db = new Database();
 module.exports = db;
