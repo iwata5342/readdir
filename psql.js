@@ -47,8 +47,6 @@ class Database {
         };
 
         files_tmp = getFile(dir.name);
-
-            /* ※attrには文字列が格納されている! 文字列=>bit, bit=>文字列 の変換関数が必要 */
             let i = 0;
             while (i < files_tmp.length) {
                 let attr;
