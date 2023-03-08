@@ -12,26 +12,23 @@ class Database {
         };
         let parCode;
 
-        pool.query(
+        sym.code = pool.query(
             "SELECT FCODE FROM FILES WHERE FNAME = $1",
             [name], (error, results) => {
               if (error) throw error;
-              sym.code = results.rows;
-        });
+        }).rows;
 
-        pool.query(
+        parCode = pool.query(
             "SELECT FCODE FROM SYMLINKS WHERE SCODE = $1",
             [sym.code], (error, results) => {
               if (error) throw error;
-              parCode = results.rows;
-        });
+        }).rows;
 
-        pool.query(
+        return pool.query(
             "SELECT FNAME FROM FILES WHERE FCODE = $1",
             [parCode], (error, results) => {
               if (error) throw error;
-              return results.rows;
-        });
+        }).row;
     };
 
     setHome(uid) {
