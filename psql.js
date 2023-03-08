@@ -1,6 +1,8 @@
-export class Database {
+const { database } = require("pg/lib/defaults");
+
+class Database {
     constructor() {
-        this.pool = require("./db");
+        this.pool = require("./loginDB");
     }
 
     chNameFromSymToDir(name) {
@@ -35,29 +37,29 @@ export class Database {
         
     }
 
-    getFiles(dir, uid) {
-        let files_tmp;
+    getFiles(data) {
+        let files_tmp = new Array();
         let infos;
         let ftype;
         let files = new Array();
 
-        if (dir.type === 'SYM') {
-            let symName = dir.name;
-            dir.name = chNameFromSymToDir (symName);
+        if (data.type === 'SYM') {
+            let symName = data.name;
+            data.name = chNameFromSymToDir (symName);
         }
 
-        pool.query(
+        this.pool.query(
           "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
-          [dir.name], (error, results) => {
+          [data.name], (error, results) => {
             if (error) throw error;
             files_tmp = results.rows;
         });
-
-        for (let i in files_tmp) {
+        let i = 0;
+        while (i < files_tmp.length) {
             let type_mask = 1792;
             let attr = files_tmp[i].attr & type_mask;
 
-            if (files_tmp[i].oid === uid) {
+            if (files_tmp[i].oid === data.uid) {
                 files_tmp[i].attr >>= 4;
             } else {
                 let tmp = files_tmp[i].attr & 15;
@@ -77,11 +79,12 @@ export class Database {
                   ftype = results.rows;
             });
 
-            files[i] = {
+            files.add({
                 name: files_tmp[i].name,
                 cmds: infos,
                 type: ftype
-            };
+            });
+        i++;
         }
         return files;
     };
@@ -113,3 +116,6 @@ export class Database {
         });
     };
 }
+
+const db = new Database()
+module.exports = db;

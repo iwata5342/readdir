@@ -1,95 +1,50 @@
 // JavaScript source code
+
+let current;
+let currinfo;
+let homedir;
+let homeent;
+let currtext;
+let uid = 12023001;
+let uname = "oasys2201";
+let cmdset;
+
 'use strict'
 
 const $ = (id) => document.getElementById(id)
 const selectedFiles = []
 
-window.onload = function() {
-  let colname = ["kisuu", "gusu"];
-  let filesinfo = [
-    {
-      name: "カレントディレクトリ名",
-      date: "modify_time",
-      execs: [],
-      type: "dir"
-    },
-    {
-      name: "ファイル名",
-      date: "modify_time",
-      execs: [ "表示", " DL ", "削除" ],
-      type: "text"
-    },
-    {
-      name: "実行ファイル名",
-      date: "modify_time",
-      execs: [ "ダンプ", " DL ", "削除" ],
-      type: "exec"
-    },
-    {
-      name: "ディレクトリ名",
-      date: "modify_time",
-      execs: [ "移動" ],
-      type: "dir"
+/*
+function setCmdSet() {
+  const xhr = new XMLHttpRequest();
+	// リクエスト
+	xhr.open("GET", 'getcommands.js');
+	//リクエスト送信
+	xhr.send();
+	// 自動的に呼ばれる関数
+	xhr.onreadystatechange = function () {
+	  // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+    // status httpステータス
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        // jsonをオブジェクトに変更
+        cmdset = JSON.parse(xhr.responseText);
     }
-  ]
-
-  let i = 0;
-  let bgcolor = document.createElement("div");
-
-  bgcolor.setAttribute("class", "d-flex");
-  bgcolor.setAttribute("class", "justify-content-between");
-  bgcolor.setAttribute("class", "currentdir");
-
-  let divs = [
-      document.createElement("div"),
-      document.createElement("div"),
-      document.createElement("div")
-  ];
-
-  let text = filesinfo[i].name;
-  i++;
-  divs[0].innerHTML = text;
-
-  let j = 0;
-  while (j < divs.length) {
-    bgcolor.appendChild(divs[j]);
-    j++;
-  };
-
-  let currdir = document.getElementById('currdir');
-  currdir.appendChild(bgcolor);
-
-
-  let entries = document.getElementById('entries');
-
-  while (i < filesinfo.length) {
-    let bgcolor = document.createElement("div");
-    bgcolor.setAttribute("class", "d-flex");
-    bgcolor.setAttribute("class", "justify-content-between");
-    if (i%2==1) {
-      bgcolor.setAttribute("class", "kisuu");
-    } else {
-      bgcolor.setAttribute("class", "gusu");
-    }
-
-    divs = [
-        document.createElement("div"),
-        document.createElement("div"),
-        document.createElement("div")
-    ];
-
-    let text = filesinfo[i].name;
-    divs[1].innerHTML = text;
-
-    j = 0;
-    while (j < divs.length) {
-      bgcolor.appendChild(divs[j]);
-      j++;
-    };
-
-    entries.appendChild(bgcolor);
-    i++;
   }
+}
+*/
+
+window.onload = function(filesinfo) {
+  //setUname(uid);
+  if(homeent == null) {
+    current = {
+      'name' : "Server/Home/" + uname, 
+      'time' : "modify_time", 
+      'exec' : [], 
+      'type' : "DIR" 
+    };
+  }
+  initDir(current, uid);
+  //FinitDiffMenu(currtext);
 }
 
 window.addEventListener('load', () => {
@@ -101,6 +56,30 @@ window.addEventListener('load', () => {
       return
     }
 
+    $('clearButton').addEventListener('click', (evt) => {
+      evt.preventDefault()
+      clear()
+    })
+    
+    $('dropTarget').addEventListener('dragover', (event) => {
+      event.preventDefault()
+    })
+    
+    $('dropTarget').addEventListener('drop', (event) => {
+      event.preventDefault()
+      if(event.dataTransfer.items) {
+        for(const item of event.dataTransfer.items){
+          const { kind } = item
+          if(kind === 'file'){
+            const file = item.getAsFile()
+            selectedFiles.push(file)
+          }
+        }
+        updateFileList()
+      }
+    })
+
+    /*
     const fd = new FormData()
     selectedFiles.forEach((f) => fd.append('file1', f, f.name))
 
@@ -158,30 +137,78 @@ window.addEventListener('load', () => {
 
     xhr.send(fd)
   })
-
-  $('clearButton').addEventListener('click', (evt) => {
-    evt.preventDefault()
-    clear()
-  })
-
-  $('dropTarget').addEventListener('dragover', (event) => {
-    event.preventDefault()
-  })
-
-  $('dropTarget').addEventListener('drop', (event) => {
-    event.preventDefault()
-    if(event.dataTransfer.items) {
-      for(const item of event.dataTransfer.items){
-        const { kind } = item
-        if(kind === 'file'){
-          const file = item.getAsFile()
-          selectedFiles.push(file)
-        }
-      }
-      updateFileList()
-    }
+  */
   })
 })
+
+
+function outputCmd(fno, cmdId) {
+  const xhr = new XMLHttpRequest();
+
+  // リクエスト
+  xhr.open("POST", 'command.js');
+
+  //リクエスト送信
+  if (fno.length == 1) xhr.send(current[fno], cmdId);
+  else if (fno.length == 2) xhr.send(current[fno[1]], current[fno[2]], cmdId);
+  else if (fno.length == 0) xhr.send(cmdId);
+
+  // 自動的に呼ばれる関数
+  xhr.onreadystatechange = function () {
+    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+    // status httpステータス
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        // jsonをオブジェクトに変更
+        const rettext = xhr.responseText;
+        let textnox = document.getElementById('textbox')
+        textbox.innerHTML = rettext;
+    }
+  }
+}
+
+function download (fno) {
+  const xhr = new XMLHttpRequest();
+
+  // リクエスト
+  xhr.open("POST", 'download.js');
+
+  //リクエスト送信
+  if (fno.length == 1) xhr.send(current[fno], cmdId);
+  else if (fno.length == 2) xhr.send(current[fno[1]], current[fno[2]], cmdId);
+
+  // 自動的に呼ばれる関数
+  xhr.onreadystatechange = function () {
+    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+    // status httpステータス
+    if (xhr.readyState == 4 && xhr.status == 200) {
+    }
+  }
+}
+
+function remove(fno) {
+  const xhr = new XMLHttpRequest();
+
+  // リクエスト
+  xhr.open("POST", 'remove.js');
+
+  //リクエスト送信
+  xhr.send(current[fno]);
+
+  // 自動的に呼ばれる関数
+  xhr.onreadystatechange = function () {
+    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+    // status httpステータス
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        const rettext = xhr.responseText;
+        let textnox = document.getElementById('textbox')
+        textbox.innerHTML = rettext;
+    }
+  }
+}
+
+function movedir(fno) {
+  initDir(current[fno], uid);
+}
 
 const setProgressBar = (percent) => {
   if (percent < 0) {
@@ -233,50 +260,130 @@ const updateFileList = () => {
   }
 }
 
-// ドラッグ&ドロップエリアの取得
-var fileArea = document.getElementById('dropArea');
+function initDir(currdir, uid) {
 
-// input[type=file]の取得
-var fileInput = document.getElementById('uploadFile');
-
-// ドラッグオーバー時の処理
-fileArea.addEventListener('dragover', function(e){
-    e.preventDefault();
-    fileArea.classList.add('dragover');
-});
-
-// ドラッグアウト時の処理
-fileArea.addEventListener('dragleave', function(e){
-    e.preventDefault();
-    fileArea.classList.remove('dragover');
-});
-
-// ドロップ時の処理
-fileArea.addEventListener('drop', function(e){
-    e.preventDefault();
-    fileArea.classList.remove('dragover');
-
-    // ドロップしたファイルの取得
-    var files = e.dataTransfer.files;
-
-    // 取得したファイルをinput[type=file]へ
-    fileInput.files = files;
-    
-    if(typeof files[0] !== 'undefined') {
-        //ファイルが正常に受け取れた際の処理
-    } else {
-        //ファイルが受け取れなかった際の処理
+	const xhr = new XMLHttpRequest();
+	// リクエスト
+	xhr.open("GET", '/init', true);
+	//リクエスト送信
+  xhr.setRequestHeader('Content-Type', 'application/json')
+  let json_src = {
+    name : current.name, 
+    time : current.time, 
+    exec : current.exec, 
+    type : current.type,
+    uid: uid
+  }
+  let json_text = JSON.stringify(json_src)
+  // xhr.send(json_text)
+  $.ajax({
+    type:"get",                // method = "GET"
+    url:"/init",        // POST送信先のURL
+    data:JSON.stringify(json_text),  // JSONデータ本体
+    contentType: 'application/json', // リクエストの Content-Type
+    dataType: "json",           // レスポンスをJSONとしてパースする
+    success: function(json_data) {   // 200 OK時
+        // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+        if (!json_data[0]) {    // サーバが失敗を返した場合
+            alert("Transaction error. " + json_data[1]);
+            return;
+        }
+        // 成功時処理
+        location.reload();
+    },
+    error: function() {         // HTTPエラー時
+        alert("Server Error. Please try again later.");
+    },
+    complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        button.attr("disabled", false);  // ボタンを再び enableにする
     }
 });
 
-// input[type=file]に変更があれば実行
-// もちろんドロップ以外でも発火します
-fileInput.addEventListener('change', function(e){
-    var file = e.target.files[0];
-    
-    if(typeof e.target.files[0] !== 'undefined') {
-        // ファイルが正常に受け取れた際の処理
-    } else {
-        // ファイルが受け取れなかった際の処理
-    }
-}, false);
+	// 自動的に呼ばれる関数
+	xhr.onreadystatechange = function () {
+	    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+	    // status httpステータス
+	    if (xhr.readyState == 4 && xhr.status == 200) {
+	        // jsonをオブジェクトに変更
+	        const jsonObj = JSON.parse(xhr.responseText);
+
+	        let colname = ["kisuu", "gusu"];
+	        let filesinfo = jsonObj;
+          let c = 0;
+          while (c < filesinfo.length) {
+            console.log(filesinfo[c++]);
+          }
+	        if (homedir == null) {
+	             homedir = filesinfo;
+	        }
+	        currinfo = filesinfo[0];
+
+	     	let i = 0;
+	  		let bgcolor = document.createElement("div");
+
+			  bgcolor.setAttribute("class", "d-flex justify-content-between currentdir bg-gradient d-block bg-success bg-opacity-50 text-dark");
+			  let divs = [
+			      document.createElement("div"),
+			      document.createElement("div"),
+			      document.createElement("div")
+			  ];
+			  let text = filesinfo[i].name;
+			  i++;
+			  divs[1].innerHTML = text;
+
+			  let j = 0;
+			  while (j < divs.length) {
+			    bgcolor.appendChild(divs[j]);
+			    j++;
+			  };
+
+			  let currdir = document.getElementById('currdir');
+        let diffmenu = document.getElementById('diffmenu');
+        while (currdir.firstChild) {
+          currdir.removeChild(currdir.firstChild);
+        }
+			  currdir.appendChild(bgcolor);
+
+			  while (i < filesinfo.length) {
+			    let bgcolor = document.createElement("div");
+			    bgcolor.setAttribute("class", "d-flex justify-content-between");
+			    if (i%2==1) {
+			      bgcolor.setAttribute("class", "bg-gradient d-block bg-secondary text-success bg-opacity-10");
+			    } else {
+			      bgcolor.setAttribute("class", "bg-gradient d-block bg-success bg-opacity-25 text-seccess");
+			    }
+
+			    divs = [
+			        document.createElement("div"),
+			        document.createElement("div"),
+			        document.createElement("div")
+			    ];
+
+			    let text = filesinfo[i].name;
+			    divs[1].innerHTML = text;
+          
+          for (let cmd in filesinfo[i].exec) {
+            let element = document.createElement("div");
+            element.setAttribute('id', cmdset.indexOf(cmd));
+            element.innerHTML(cmd);
+            divs[2].appendChild(element);
+          }
+
+			    j = 0;
+			    while (j < divs.length) {
+			      bgcolor.appendChild(divs[j]);
+			      j++;
+			    };
+
+          if (filesinfo[i].type === 'TXT' || filesinfo[i].type === 'C' || filesinfo[i].type === 'CPP') {
+            let option = document.createElement("option");
+            option.innerHTML = filesinfo[i].name;
+            diffmenu.appendChild(option);
+          }
+
+			    currdir.appendChild(bgcolor);
+			    i++;
+        }
+      }
+  }
+}

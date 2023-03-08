@@ -1,11 +1,15 @@
 {
   "name": "readdir",
   "version": "1.0.0",
-  "description": "",
   "main": "readdir.js",
   "scripts": {
-    "start": "nodemon test.js"
+    "start": "nodemon index.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "initDir": "file: ./initDir",
+    "psql": "file: ./psql"
+  },
+  "description": ""
 }
