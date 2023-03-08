@@ -69,3 +69,7 @@ const getClient = async () => {
 };
 
 module.exports.getPostgresClient = getClient;
+
+/**
+ * 
+ */ 
