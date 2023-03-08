@@ -37,7 +37,7 @@ class Database {
         
     }
 
-    getFiles(dir) {
+    getFiles(dir, uid) {
         let files_tmp = new Array();
         let infos;
         let ftype;
