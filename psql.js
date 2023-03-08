@@ -7,16 +7,14 @@ class Database {
     };
 
     chNameFromSymToDir(name) {
-        let sym = {
-            code: 0
-        };
+        let sym = { code: 0 };
         let parCode;
-        let dir_name;
+        let dir = { name: "" };
 
         sym.code = getSymCode(name);
         parCode = getParCode(sym.code);
-        dir_name = getDirName(parCode);
-        return dir_name;
+        dir.name = getDirName(parCode);
+        return dir.name;
     };
 
     setHome(uid) {
@@ -24,7 +22,7 @@ class Database {
     };
 
     getFiles(dir, uid, res) {
-        let files_tmp;
+        let entries; // entries ⇔ files_tmp
         let infos;
         let ftype;
         let files;
