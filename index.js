@@ -32,7 +32,11 @@ app.get('/init', (req, res) => {
 });
 
 app.get('/delete', (req, res) => {
-    return database.delete File(req.body.name, res);
+    return database.deleteFile(req.body.name, res);
+});
+
+app.get('/createdir', (req, res) => {
+    return database.createDir(req.body.name, res.body.dir, res);
 });
 
 /*
