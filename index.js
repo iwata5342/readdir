@@ -2,6 +2,10 @@
 const express = require('express')
 const path = require('path')
 const multer = require('multer')
+
+/* 新規 */
+const bodyParser = require('body-parser');
+
 const database = require('./psql.js')
 
 const app = express()
@@ -19,14 +23,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 app.use(express.static(path.join(__dirname, '.')))
-app.use(express.json())
-app.use(express.urlencoded({extended : true}))
+app.use(bodyParser.json())
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, './file-choice.html')))
 
 app.get('/init', (req, res) => {
-    console.log(req.name);
-    let initdata = database.getFiles(req.body);
+    console.log(req.body.name);
+
+    /* 引数変更 */
+    let initdata = database.getFiles(req.body.dir, req.body.uid);
+    
     return res.status(200).json(initdata);
 });
   //return res.status(200).json(init);
