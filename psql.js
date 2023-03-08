@@ -11,24 +11,12 @@ class Database {
             code: 0
         };
         let parCode;
+        let dir_name;
 
-        sym.code = pool.query(
-            "SELECT FCODE FROM FILES WHERE FNAME = $1",
-            [name], (error, results) => {
-              if (error) throw error;
-        }).rows;
-
-        parCode = pool.query(
-            "SELECT FCODE FROM SYMLINKS WHERE SCODE = $1",
-            [sym.code], (error, results) => {
-              if (error) throw error;
-        }).rows;
-
-        return pool.query(
-            "SELECT FNAME FROM FILES WHERE FCODE = $1",
-            [parCode], (error, results) => {
-              if (error) throw error;
-        }).row;
+        sym.code = getSymCode(name);
+        parCode = getParCode(sym.code);
+        dir_name = getDirName(parCode);
+        return dir_name;
     };
 
     setHome(uid) {
@@ -39,14 +27,14 @@ class Database {
         let files_tmp;
         let infos;
         let ftype;
-        let files = new Array();
+        let files;
 
         if (dir.type === 'SYM') {
             let symName = dir.name;
-            data.name = chNameFromSymToDir (symName);
+            data.name = chNameFromSymToDir(symName);
         };
 
-        files_tmp = getFile(dir.name);
+        files_tmp = getEntry(dir.name);
             let i = 0;
             while (i < files_tmp.length) {
                 let attr;
@@ -101,29 +89,53 @@ class Database {
         });
     };
 
-    getFile(dname) {
-        return JSON.parse(JSON.stringfy((pool.query(
+    getSymCode(name) {
+        return JSON.parse(JSON.stringfy(pool.query(
+               "SELECT FCODE FROM FILES WHERE FNAME = $1",
+               [name], (error, results) => {
+                   if (error) throw error;
+               }).rows));
+    };
+
+    getParCode(sym_code) {
+        return JSON.parse(JSON.stringfy(pool.query(
+               "SELECT FCODE FROM SYMLINKS WHERE SCODE = $1",
+               [sym_code], (error, results) => {
+                   if (error) throw error;
+               }).rows));
+    };
+
+    getDirName(dcode) {
+        returu JSON.parse(JSON.stringfy(pool.query(
+               "SELECT FNAME FROM FILES WHERE FCODE = $1",
+               [parCode], (error, results) => {
+                   if (error) throw error;
+               }).row));
+    };
+
+    getEntry(dname) {
+        return JSON.parse(JSON.stringfy(pool.query(
                "SELECT FNAME AS name, OID AS oid, ATTR AS attr, (ATTR & B'11100000000') AS types FROM FILES WHERE FNAME LIKE $1 || '/%' AND FNAME NOT LIKE $1 || '/%/%';",
                [dname], (error, results) => {
         
                    if (error) throw error;
-               })))).rows);
+               }).rows));
     };
 
     getInfo(attr) {
-        return JSON.parse(JSON.stringfy((pool.query(
+        return JSON.parse(JSON.stringfy(pool.query(
                "SELECT ECODE AS command FROM EXECUTABLES WHERE (ATTR_CODE >> 4) = (B$1 >> 4) AND ((ATTR_CODE & B'0001111') & (B$1 & B'0001111') > B'0000000');", 
                [attr], (error, results) => {
                    if (error) throw error;
-               })))).rows;
+               }).rows));
     };
 
     getType(type) {
-        return JSON.parse(JSON.stringfy((pool.query(
+        return JSON.parse(JSON.stringfy(pool.query(
                "SELECT TNAME FROM FILE_TYPES WHERE TCODE = B$1", 
                [type + '00000000'], (error, results) => {
                    if (error) throw error;
-               })))).rows;
+               }).rows));
     }
 };
 
