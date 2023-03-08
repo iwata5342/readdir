@@ -8,6 +8,7 @@ let currtext;
 let uid = 12023001;
 let uname = "oasys2201";
 let cmdset;
+let colname = ["kisuu", "gusu"];
 
 'use strict'
 
@@ -44,7 +45,7 @@ window.onload = function(filesinfo) {
     };
   }
   initDir(current, uid);
-  //FinitDiffMenu(currtext);
+  initDiffMenu(currtext);
 }
 
 window.addEventListener('load', () => {
@@ -155,7 +156,7 @@ function outputCmd(fno, cmdId) {
 
   // 自動的に呼ばれる関数
   xhr.onreadystatechange = function () {
-    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+  // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
     // status httpステータス
     if (xhr.readyState == 4 && xhr.status == 200) {
         // jsonをオブジェクトに変更
@@ -207,7 +208,6 @@ function remove(fno) {
 }
 
 function movedir(fno) {
-  initDir(current[fno], uid);
 }
 
 const setProgressBar = (percent) => {
@@ -261,88 +261,58 @@ const updateFileList = () => {
 }
 
 function initDir(currdir, uid) {
-
-	const xhr = new XMLHttpRequest();
-	// リクエスト
-	xhr.open("GET", '/init', true);
-	//リクエスト送信
+  const xhr = new XMLHttpRequest();
+  // リクエスト
+  xhr.open("GET", '/init', true);
+  //リクエスト送信
   xhr.setRequestHeader('Content-Type', 'application/json')
   let json_src = {
-    name : current.name, 
-    time : current.time, 
-    exec : current.exec, 
-    type : current.type,
+    dir: current
     uid: uid
   }
   let json_text = JSON.stringify(json_src)
   // xhr.send(json_text)
-  $.ajax({
-    type:"get",                // method = "GET"
-    url:"/init",        // POST送信先のURL
-    data:JSON.stringify(json_text),  // JSONデータ本体
-    contentType: 'application/json', // リクエストの Content-Type
-    dataType: "json",           // レスポンスをJSONとしてパースする
-    success: function(json_data) {   // 200 OK時
-        // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
-        if (!json_data[0]) {    // サーバが失敗を返した場合
-            alert("Transaction error. " + json_data[1]);
-            return;
-        }
-        // 成功時処理
-        location.reload();
-    },
-    error: function() {         // HTTPエラー時
-        alert("Server Error. Please try again later.");
-    },
-    complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
-        button.attr("disabled", false);  // ボタンを再び enableにする
-    }
-});
+  // 自動的に呼ばれる関数
+  xhr.onreadystatechange = function () {
+  // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
+  // status httpステータス
+  if (xhr.readyState == 4 && xhr.status == 200) {
+  // jsonをオブジェクトに変更
+  const jsonObj = JSON.parse(xhr.responseText);
+  let filesinfo = jsonObj;
+  let c = 0;
+  while (c < filesinfo.length) {
+    console.log(filesinfo[c++]);
+  }
+  if (homedir == null) {
+    homedir = filesinfo
+  }
+  currinfo = filesinfo[0];
 
-	// 自動的に呼ばれる関数
-	xhr.onreadystatechange = function () {
-	    // readyState XMLHttpRequest の状態 4: リクエストが終了して準備が完了
-	    // status httpステータス
-	    if (xhr.readyState == 4 && xhr.status == 200) {
-	        // jsonをオブジェクトに変更
-	        const jsonObj = JSON.parse(xhr.responseText);
+  let i = 0;
+  let bgcolor = document.createElement("div");
 
-	        let colname = ["kisuu", "gusu"];
-	        let filesinfo = jsonObj;
-          let c = 0;
-          while (c < filesinfo.length) {
-            console.log(filesinfo[c++]);
-          }
-	        if (homedir == null) {
-	             homedir = filesinfo;
-	        }
-	        currinfo = filesinfo[0];
+  bgcolor.setAttribute("class", "d-flex justify-content-between currentdir bg-gradient d-block bg-success bg-opacity-50 text-dark");
+  let divs = [
+    document.createElement("div"),
+    document.createElement("div"),
+    document.createElement("div")
+  ];
+  let text = filesinfo[i].name;
+  i++;
+  divs[1].innerHTML = text;
 
-	     	let i = 0;
-	  		let bgcolor = document.createElement("div");
-
-			  bgcolor.setAttribute("class", "d-flex justify-content-between currentdir bg-gradient d-block bg-success bg-opacity-50 text-dark");
-			  let divs = [
-			      document.createElement("div"),
-			      document.createElement("div"),
-			      document.createElement("div")
-			  ];
-			  let text = filesinfo[i].name;
-			  i++;
-			  divs[1].innerHTML = text;
-
-			  let j = 0;
-			  while (j < divs.length) {
-			    bgcolor.appendChild(divs[j]);
-			    j++;
-			  };
-
-			  let currdir = document.getElementById('currdir');
-        let diffmenu = document.getElementById('diffmenu');
-        while (currdir.firstChild) {
-          currdir.removeChild(currdir.firstChild);
-        }
-			  currdir.appendChild(bgcolor);
+  let j = 0;
+  while (j < divs.length) {
+    bgcolor.appendChild(divs[j]);
+    j++;
+  }
+  let currdir = document.getElementById('currdir');
+  let diffmenu = document.getElementById('diffmenu');
+  while (currdir.firstChild) {
+    currdir.removeChild(currdir.firstChild);
+  }
+  currdir.appendChild(bgcolor);
 
 			  while (i < filesinfo.length) {
 			    let bgcolor = document.createElement("div");
