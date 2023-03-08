@@ -37,7 +37,7 @@ class Database {
         
     }
 
-    getFiles(dir, uid) {
+    getFiles(dir, uid, res) {
         let files_tmp = new Array();
         let infos;
         let ftype;
@@ -86,10 +86,10 @@ class Database {
             });
         i++;
         }
-        return files;
+        return res.status(200).json(files);
     };
 
-    deleteFile(file) {
+    deleteFile(file, res) {
         if (file.type === 'DIR') {
             file.name += '%';
         } else if (file.type === 'SYM') {
