@@ -28,14 +28,13 @@ app.use(bodyParser.json())
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, './file-choice.html')))
 
 app.get('/init', (req, res) => {
-    console.log(req.body.name);
-
-    /* 引数変更 */
     let initdata = database.getFiles(req.body.dir, req.body.uid);
-    
     return res.status(200).json(initdata);
 });
-  //return res.status(200).json(init);
+
+app.get('/delete', (req, res) => {
+    return database.delete File(req.body.name, res);
+});
 
 /*
 app.get('/psql.js', (req, res) => {
