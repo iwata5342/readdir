@@ -8,12 +8,12 @@ class Database {
 
     chNameFromSymToDir(name) {
         let sym = { code: 0 };
-        let parCode;
+        let parent = { code: 0 };
         let dir = { name: "" };
 
         sym.code = getSymCode(name);
-        parCode = getParCode(sym.code);
-        dir.name = getDirName(parCode);
+        parent.code = getParCode(sym.code);
+        dir.name = getDirName(parent.code);
         return dir.name;
     };
 
